@@ -1,20 +1,43 @@
 import React from "react";
-import { useRecoilState } from "recoil";
-import { currentTrackIdState, isPlayingState } from "../atoms/songAtom";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import {
+  currentTrackIdState,
+  isPlayingState,
+  playDevice,
+} from "../atoms/songAtom";
 import useSpotify from "../hooks/useSpotify";
 import { millisecondToMinutesAndSeconds } from "../lib/time";
 
 function Song({ track, order }) {
   const spotifyApi = useSpotify();
-  const [currentTrackId, setCurrentTrackId] =
-    useRecoilState(currentTrackIdState);
-  const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
-  const playSong = () => {
-    setCurrentTrackId(track.track.id);
-    setIsPlaying(true);
-    spotifyApi.play({
-      uris: [track.track.uri],
+  const setCurrentTrackId = useSetRecoilState(currentTrackIdState);
+  const setIsPlaying = useSetRecoilState(isPlayingState);
+  const [myDevice, setMyDevice] = useRecoilState(playDevice);
+  const getAvailableDevice = () => {
+    spotifyApi.getMyDevices().then((data) => {
+      const devices = data?.body?.devices;
+      if (devices.length > 0) {
+        setMyDevice([devices[0].id]);
+      }
     });
+    if (myDevice.length > 0) {
+      spotifyApi
+        .transferMyPlayback(myDevice)
+        .then(() => console.log("Activate!"))
+        .catch((err) => console.error(err));
+    }
+  };
+  const playSong = () => {
+    getAvailableDevice();
+    if (myDevice.length > 0) {
+      setCurrentTrackId(track.track.id);
+      setIsPlaying(true);
+      spotifyApi.play({
+        uris: [track.track.uri],
+      });
+    } else {
+      alert("Please open your Spotify App");
+    }
   };
 
   return (

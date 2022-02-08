@@ -1,8 +1,12 @@
 import { useSession } from "next-auth/react";
 import useSpotify from "../hooks/useSpotify";
-import { currentTrackIdState, isPlayingState } from "../atoms/songAtom";
+import {
+  currentTrackIdState,
+  isPlayingState,
+  playDevice,
+} from "../atoms/songAtom";
 import { useCallback, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import useSongInfo from "../hooks/useSongInfo";
 import {
   VolumeUpIcon as VolumeDownIcon,
@@ -25,12 +29,12 @@ function Player() {
     useRecoilState(currentTrackIdState);
   const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
   const [volume, setVolume] = useState(50);
+  const myDevice = useRecoilValue(playDevice);
   const songInfo = useSongInfo();
 
   const fetchCurrentSongInfo = () => {
     if (!songInfo) {
       spotifyApi.getMyCurrentPlayingTrack().then((data) => {
-        console.log("Now play: ", data.body?.item?.id);
         setCurrentTrackId(data.body?.item?.id);
         spotifyApi.getMyCurrentPlaybackState().then((data) => {
           setIsPlaying(data.body?.is_playing);
@@ -48,6 +52,7 @@ function Player() {
 
   const handlePlayPause = () => {
     spotifyApi.getMyCurrentPlaybackState().then((data) => {
+      if (!data?.body) return;
       if (data.body.is_playing) {
         spotifyApi.pause();
         setIsPlaying(false);
@@ -59,7 +64,7 @@ function Player() {
   };
 
   useEffect(() => {
-    if (volume > 0 && volume < 100) {
+    if (volume > 0 && volume < 100 && myDevice.length > 0) {
       debounceAdjustVolume(volume);
     }
   }, [volume]);

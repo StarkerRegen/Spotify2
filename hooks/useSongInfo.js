@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { currentTrackIdState } from "../atoms/songAtom";
 import useSpotify from "./useSpotify";
 
 function useSongInfo() {
   const spotifyApi = useSpotify();
-  const [currentTrackId, setCurrentTrackId] =
-    useRecoilState(currentTrackIdState);
+  const currentTrackId = useRecoilValue(currentTrackIdState);
   const [songInfo, setSongInfo] = useState(null);
 
   useEffect(() => {
