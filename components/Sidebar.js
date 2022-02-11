@@ -7,17 +7,20 @@ import {
   HeartIcon,
   RssIcon,
   LogoutIcon,
+  VolumeUpIcon,
 } from "@heroicons/react/outline";
 import { useEffect, useState } from "react";
 import useSpotify from "../hooks/useSpotify";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { playlistIdState } from "../atoms/playlistAtom";
+import { isPlayingState } from "../atoms/songAtom";
 
 function Sidebar() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [playlists, setPlaylists] = useState([]);
   const [currentPlaylistId, setCurrentPlaylistId] =
     useRecoilState(playlistIdState);
+  const isPlaying = useRecoilValue(isPlayingState);
   const spotifyApi = useSpotify();
 
   useEffect(() => {
@@ -69,15 +72,21 @@ function Sidebar() {
         </button>
         <hr className="border-t-[0.1px] border-gray-900"></hr>
 
-        {playlists.map((playlist) => (
-          <p
-            key={playlist.id}
-            className="cursor-pointer hover:text-white"
-            onClick={() => setCurrentPlaylistId(playlist.id)}
-          >
-            {playlist.name}
-          </p>
-        ))}
+        {playlists.map((playlist) => {
+          const color =
+            playlist.id === currentPlaylistId && isPlaying
+              ? "text-green-600"
+              : "text-gray-500";
+          return (
+            <p
+              key={playlist.id}
+              className={`${color} cursor-pointer hover:text-white`}
+              onClick={() => setCurrentPlaylistId(playlist.id)}
+            >
+              {playlist.name}
+            </p>
+          );
+        })}
       </div>
     </div>
   );

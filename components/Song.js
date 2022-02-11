@@ -1,6 +1,6 @@
-import React from "react";
 import { useRecoilValue, useRecoilState, useSetRecoilState } from "recoil";
 import { MusicNoteIcon } from "@heroicons/react/solid";
+import { playlistState } from "../atoms/playlistAtom";
 import {
   currentTrackIdState,
   isPlayingState,
@@ -15,12 +15,16 @@ function Song({ track, order }) {
     useRecoilState(currentTrackIdState);
   const setIsPlaying = useSetRecoilState(isPlayingState);
   const myDevice = useRecoilValue(playDevice);
+  const playlist = useRecoilValue(playlistState);
   const playSong = () => {
     if (myDevice.length > 0) {
       setCurrentTrackId(track.track.id);
       setIsPlaying(true);
       spotifyApi.play({
-        uris: [track.track.uri],
+        context_uri: playlist.uri,
+        offset: {
+          position: order,
+        },
       });
     } else {
       alert("Please open your Spotify App");

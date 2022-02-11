@@ -30,8 +30,9 @@ function Player() {
   const [nextTrackId, setNextTrackId] = useState("");
   const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
   const [volume, setVolume] = useState(50);
-  const [repeatMode, setRepeatMode] = useState(false);
+  const [offset, setOffset] = useState(0);
   const playlist = useRecoilValue(playlistState);
+  const [repeatMode, setRepeatMode] = useState("off");
   const myDevice = useRecoilValue(playDevice);
   const songInfo = useSongInfo();
 
@@ -41,6 +42,7 @@ function Player() {
         setCurrentTrackId(data.body?.item?.id);
         spotifyApi.getMyCurrentPlaybackState().then((data) => {
           setIsPlaying(data.body?.is_playing);
+          setRepeatMode(data.body?.repeat_state);
         });
       });
     }
@@ -51,6 +53,7 @@ function Player() {
     const len = items?.length;
     for (let i = 0; i < len; i++) {
       if (items[i].track.id == currentTrackId) {
+        setOffset(i);
         setPrevTrackId(!items[i - 1] ? "" : items[i - 1].track.id);
         setNextTrackId(!items[i + 1] ? "" : items[i + 1].track.id);
       }
@@ -94,10 +97,17 @@ function Player() {
   useEffect(() => {
     if (songInfo && isPlaying && myDevice.length > 0) {
       getPrevAndNextId();
-      spotifyApi.play({
-        uris: [songInfo.uri],
-        //position_ms: 0,
-      });
+      spotifyApi
+        .play({
+          context_uri: playlist.uri,
+          offset: {
+            position: offset,
+          },
+          position_ms: 0,
+        })
+        .then(() => {
+          setIsPlaying(true);
+        });
     }
   }, [songInfo]);
 
@@ -105,7 +115,7 @@ function Player() {
     getPrevAndNextId();
     if (nextTrackId && myDevice.length > 0) {
       setCurrentTrackId(nextTrackId);
-      setIsPlaying(true);
+      setOffset(offset + 1);
     }
   };
 
@@ -113,16 +123,20 @@ function Player() {
     getPrevAndNextId();
     if (prevTrackId && myDevice.length > 0) {
       setCurrentTrackId(prevTrackId);
-      setIsPlaying(true);
+      setOffset(offset - 1);
     }
   };
 
-  useEffect(() => {
-    const mode = repeatMode ? "context" : "off";
-    spotifyApi.setRepeat(mode);
-  }, [repeatMode]);
+  const changeRepeatMode = () => {
+    if (myDevice.length > 0) {
+      const mode = repeatMode === "off" ? "context" : "off";
+      setRepeatMode(mode);
+      spotifyApi.setRepeat(mode);
+    }
+  };
 
-  const repeatIconColor = repeatMode ? "text-white" : "text-gray-500";
+  const repeatIconColor =
+    repeatMode === "context" ? "text-white" : "text-gray-500";
 
   return (
     <div
@@ -144,7 +158,7 @@ function Player() {
       <div className="flex items-center justify-evenly">
         <SwitchHorizontalIcon
           className={`button ${repeatIconColor}`}
-          onClick={() => setRepeatMode(!repeatMode)}
+          onClick={changeRepeatMode}
         />
         <RewindIcon className="button" onClick={skipToPrev} />
         {isPlaying ? (

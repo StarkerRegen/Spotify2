@@ -30,6 +30,9 @@ function Center() {
 
   useEffect(() => {
     setColor(shuffle(colors).pop());
+    if (isPlaying) {
+      spotifyApi.pause().then(setIsPlaying(false));
+    }
   }, [currentPlaylistId]);
 
   useEffect(() => {
@@ -39,18 +42,21 @@ function Center() {
       .catch((error) => console.log("Opps!There are somthing wrong, ", error));
   }, [spotifyApi, currentPlaylistId]);
 
-  // const handlePlayPause = () => {
-  //   if (isPlaying) {
-  //     spotifyApi.pause().then(setIsPlaying(false));
-  //   } else {
-  //     spotifyApi
-  //       .play({
-  //         context_uri: playlist.uri,
-  //       })
-  //       .then(setCurrentTrackId(playlist.tracks.items[0].track.id));
-  //     setIsPlaying(true);
-  //   }
-  // };
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      spotifyApi.pause().then(setIsPlaying(false));
+    } else {
+      spotifyApi
+        .play({
+          context_uri: playlist.uri,
+          offset: {
+            position: 0,
+          },
+        })
+        .then(setCurrentTrackId(playlist.tracks.items[0].track.id));
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <div className="flex-grow text-white h-screen overflow-y-scroll scrollbar-hide">
@@ -84,7 +90,7 @@ function Center() {
         </div>
       </section>
       <section>
-        {/* <div>
+        <div>
           {isPlaying ? (
             <PauseIcon
               className="button w-20 h-20 ml-10 text-green-600"
@@ -96,7 +102,7 @@ function Center() {
               onClick={handlePlayPause}
             />
           )}
-        </div> */}
+        </div>
         <Songs />
       </section>
     </div>
