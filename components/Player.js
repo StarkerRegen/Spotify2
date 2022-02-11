@@ -94,8 +94,7 @@ function Player() {
 
   useEffect(() => {
     if (songInfo && isPlaying && myDevice.length > 0) {
-      console.log("changed");
-      console.log(songInfo);
+      getPrevAndNextId();
       spotifyApi.play({
         uris: [songInfo.uri],
         position_ms: 0,
@@ -108,7 +107,6 @@ function Player() {
     if (nextTrackId && myDevice.length > 0) {
       setCurrentTrackId(nextTrackId);
       setIsPlaying(true);
-      console.log("next");
     }
   };
 
@@ -117,7 +115,6 @@ function Player() {
     if (prevTrackId && myDevice.length > 0) {
       setCurrentTrackId(prevTrackId);
       setIsPlaying(true);
-      console.log("prev");
     }
   };
 
