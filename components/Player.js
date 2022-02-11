@@ -54,8 +54,12 @@ function Player() {
     for (let i = 0; i < len; i++) {
       if (items[i].track.id == currentTrackId) {
         setOffset(i);
-        setPrevTrackId(!items[i - 1] ? "" : items[i - 1].track.id);
-        setNextTrackId(!items[i + 1] ? "" : items[i + 1].track.id);
+        setPrevTrackId(
+          !items[i - 1] ? items[len - 1].track.id : items[i - 1].track.id
+        );
+        setNextTrackId(
+          !items[i + 1] ? items[0].track.id : items[i + 1].track.id
+        );
       }
     }
   };
