@@ -1,8 +1,10 @@
 import { ChevronDownIcon } from "@heroicons/react/outline";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { PauseIcon, PlayIcon } from "@heroicons/react/solid";
 import { playlistIdState, playlistState } from "../atoms/playlistAtom";
+import { isPlayingState, currentTrackIdState } from "../atoms/songAtom";
 import useSpotify from "../hooks/useSpotify";
 import Songs from "./Songs";
 import { shuffle } from "lodash";
@@ -22,6 +24,8 @@ function Center() {
   const [color, setColor] = useState("from-pink-400");
   const currentPlaylistId = useRecoilValue(playlistIdState);
   const [playlist, setPlaylist] = useRecoilState(playlistState);
+  const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
+  const setCurrentTrackId = useSetRecoilState(currentTrackIdState);
   const spotifyApi = useSpotify();
 
   useEffect(() => {
@@ -34,6 +38,19 @@ function Center() {
       .then((data) => setPlaylist(data.body))
       .catch((error) => console.log("Opps!There are somthing wrong, ", error));
   }, [spotifyApi, currentPlaylistId]);
+
+  // const handlePlayPause = () => {
+  //   if (isPlaying) {
+  //     spotifyApi.pause().then(setIsPlaying(false));
+  //   } else {
+  //     spotifyApi
+  //       .play({
+  //         context_uri: playlist.uri,
+  //       })
+  //       .then(setCurrentTrackId(playlist.tracks.items[0].track.id));
+  //     setIsPlaying(true);
+  //   }
+  // };
 
   return (
     <div className="flex-grow text-white h-screen overflow-y-scroll scrollbar-hide">
@@ -66,7 +83,22 @@ function Center() {
           </h1>
         </div>
       </section>
-      <Songs />
+      <section>
+        {/* <div>
+          {isPlaying ? (
+            <PauseIcon
+              className="button w-20 h-20 ml-10 text-green-600"
+              onClick={handlePlayPause}
+            />
+          ) : (
+            <PlayIcon
+              className="button w-20 h-20 ml-10 text-green-600"
+              onClick={handlePlayPause}
+            />
+          )}
+        </div> */}
+        <Songs />
+      </section>
     </div>
   );
 }

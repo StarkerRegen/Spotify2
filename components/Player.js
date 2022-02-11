@@ -9,11 +9,9 @@ import { playlistState } from "../atoms/playlistAtom";
 import { useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import useSongInfo from "../hooks/useSongInfo";
+import { VolumeUpIcon as VolumeDownIcon } from "@heroicons/react/outline";
 import {
-  VolumeUpIcon as VolumeDownIcon,
   VolumeUpIcon,
-} from "@heroicons/react/outline";
-import {
   FastForwardIcon,
   PauseIcon,
   PlayIcon,
@@ -32,6 +30,7 @@ function Player() {
   const [nextTrackId, setNextTrackId] = useState("");
   const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
   const [volume, setVolume] = useState(50);
+  const [repeatMode, setRepeatMode] = useState(false);
   const playlist = useRecoilValue(playlistState);
   const myDevice = useRecoilValue(playDevice);
   const songInfo = useSongInfo();
@@ -97,7 +96,7 @@ function Player() {
       getPrevAndNextId();
       spotifyApi.play({
         uris: [songInfo.uri],
-        position_ms: 0,
+        //position_ms: 0,
       });
     }
   }, [songInfo]);
@@ -118,6 +117,13 @@ function Player() {
     }
   };
 
+  useEffect(() => {
+    const mode = repeatMode ? "context" : "off";
+    spotifyApi.setRepeat(mode);
+  }, [repeatMode]);
+
+  const repeatIconColor = repeatMode ? "text-white" : "text-gray-500";
+
   return (
     <div
       className="h-24 bg-gradient-to-b from-black to-gray-900 text-white
@@ -136,7 +142,10 @@ function Player() {
       </div>
 
       <div className="flex items-center justify-evenly">
-        <SwitchHorizontalIcon className="button" />
+        <SwitchHorizontalIcon
+          className={`button ${repeatIconColor}`}
+          onClick={() => setRepeatMode(!repeatMode)}
+        />
         <RewindIcon className="button" onClick={skipToPrev} />
         {isPlaying ? (
           <PauseIcon className="button w-10 h-10" onClick={handlePlayPause} />
