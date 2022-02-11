@@ -1,5 +1,6 @@
 import React from "react";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilValue, useRecoilState, useSetRecoilState } from "recoil";
+import { MusicNoteIcon } from "@heroicons/react/solid";
 import {
   currentTrackIdState,
   isPlayingState,
@@ -10,25 +11,11 @@ import { millisecondToMinutesAndSeconds } from "../lib/time";
 
 function Song({ track, order }) {
   const spotifyApi = useSpotify();
-  const setCurrentTrackId = useSetRecoilState(currentTrackIdState);
+  const [currentTrackId, setCurrentTrackId] =
+    useRecoilState(currentTrackIdState);
   const setIsPlaying = useSetRecoilState(isPlayingState);
-  const [myDevice, setMyDevice] = useRecoilState(playDevice);
-  const getAvailableDevice = () => {
-    spotifyApi.getMyDevices().then((data) => {
-      const devices = data?.body?.devices;
-      if (devices.length > 0) {
-        setMyDevice([devices[0].id]);
-      }
-    });
-    if (myDevice.length > 0) {
-      spotifyApi
-        .transferMyPlayback(myDevice)
-        .then(() => console.log("Activate!"))
-        .catch((err) => console.error(err));
-    }
-  };
+  const myDevice = useRecoilValue(playDevice);
   const playSong = () => {
-    getAvailableDevice();
     if (myDevice.length > 0) {
       setCurrentTrackId(track.track.id);
       setIsPlaying(true);
@@ -40,17 +27,31 @@ function Song({ track, order }) {
     }
   };
 
+  const bgColor =
+    track.track.id == currentTrackId ? "bg-gray-800" : "bg-black-700";
+  const textColor =
+    track.track.id == currentTrackId ? "text-green-600" : "text-white";
+
   return (
-    <div className="grid grid-cols-2 text-gray-500 px-5 py-4 hover:bg-gray-800 rounded-lg cursor-pointer">
+    <div
+      className={`grid grid-cols-2 ${bgColor} px-5 py-4 hover:bg-gray-500 rounded-lg cursor-pointer`}
+    >
       <div className="flex items-center space-x-4" onClick={playSong}>
-        <p>{order + 1}</p>
+        {track.track.id == currentTrackId ? (
+          <MusicNoteIcon className="h-4 w-4 text-green-600" />
+        ) : (
+          <p className="pl-1 pr-1">{order + 1}</p>
+        )}
+
         <img
           className="h-10 w-10"
           src={track.track.album.images[0].url}
           alt={track.track.album.name}
         />
         <div>
-          <p className="w-36 lg:w-64 truncate text-white">{track.track.name}</p>
+          <p className={`w-36 lg:w-64 truncate ${textColor}`}>
+            {track.track.name}
+          </p>
           <p>{track.track.artists[0].name}</p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
   isPlayingState,
   playDevice,
 } from "../atoms/songAtom";
+import { playlistState } from "../atoms/playlistAtom";
 import { useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import useSongInfo from "../hooks/useSongInfo";
@@ -24,11 +25,14 @@ import { debounce } from "lodash";
 
 function Player() {
   const spotifyApi = useSpotify();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [currentTrackId, setCurrentTrackId] =
     useRecoilState(currentTrackIdState);
+  const [prevTrackId, setPrevTrackId] = useState("");
+  const [nextTrackId, setNextTrackId] = useState("");
   const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
   const [volume, setVolume] = useState(50);
+  const playlist = useRecoilValue(playlistState);
   const myDevice = useRecoilValue(playDevice);
   const songInfo = useSongInfo();
 
@@ -43,9 +47,21 @@ function Player() {
     }
   };
 
+  const getPrevAndNextId = () => {
+    const items = playlist?.tracks.items;
+    const len = items?.length;
+    for (let i = 0; i < len; i++) {
+      if (items[i].track.id == currentTrackId) {
+        setPrevTrackId(!items[i - 1] ? "" : items[i - 1].track.id);
+        setNextTrackId(!items[i + 1] ? "" : items[i + 1].track.id);
+      }
+    }
+  };
+
   useEffect(() => {
     if (spotifyApi.getAccessToken() && !currentTrackId) {
       fetchCurrentSongInfo();
+      getPrevAndNextId();
       setVolume(50);
     }
   }, [currentTrackId, spotifyApi, session]);
@@ -76,6 +92,35 @@ function Player() {
     []
   );
 
+  useEffect(() => {
+    if (songInfo && isPlaying && myDevice.length > 0) {
+      console.log("changed");
+      console.log(songInfo);
+      spotifyApi.play({
+        uris: [songInfo.uri],
+        position_ms: 0,
+      });
+    }
+  }, [songInfo]);
+
+  const skipToNext = () => {
+    getPrevAndNextId();
+    if (nextTrackId && myDevice.length > 0) {
+      setCurrentTrackId(nextTrackId);
+      setIsPlaying(true);
+      console.log("next");
+    }
+  };
+
+  const skipToPrev = () => {
+    getPrevAndNextId();
+    if (prevTrackId && myDevice.length > 0) {
+      setCurrentTrackId(prevTrackId);
+      setIsPlaying(true);
+      console.log("prev");
+    }
+  };
+
   return (
     <div
       className="h-24 bg-gradient-to-b from-black to-gray-900 text-white
@@ -95,13 +140,13 @@ function Player() {
 
       <div className="flex items-center justify-evenly">
         <SwitchHorizontalIcon className="button" />
-        <RewindIcon className="button" />
+        <RewindIcon className="button" onClick={skipToPrev} />
         {isPlaying ? (
           <PauseIcon className="button w-10 h-10" onClick={handlePlayPause} />
         ) : (
           <PlayIcon className="button w-10 h-10" onClick={handlePlayPause} />
         )}
-        <FastForwardIcon className="button" />
+        <FastForwardIcon className="button" onClick={skipToNext} />
         <ReplyIcon className="button" />
       </div>
 
