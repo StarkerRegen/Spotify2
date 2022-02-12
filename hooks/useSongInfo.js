@@ -21,6 +21,8 @@ function useSongInfo() {
           }
         ).then((res) => res.json());
         setSongInfo(trackInfo);
+      } else {
+        setSongInfo(null);
       }
     };
     const getAvailableDevice = () => {

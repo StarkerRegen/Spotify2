@@ -14,3 +14,13 @@ export const playDevice = atom({
   key: "playDevice",
   default: [],
 });
+
+export const playPosition = atom({
+  key: "playPosition",
+  default: 0,
+});
+
+export const playOffset = atom({
+  key: "playOffset",
+  default: 0,
+});

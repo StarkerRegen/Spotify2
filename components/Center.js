@@ -1,10 +1,19 @@
-import { ChevronDownIcon } from "@heroicons/react/outline";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { PauseIcon, PlayIcon } from "@heroicons/react/solid";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faCirclePlay,
+  faCirclePause,
+} from "@fortawesome/free-solid-svg-icons";
 import { playlistIdState, playlistState } from "../atoms/playlistAtom";
-import { isPlayingState, currentTrackIdState } from "../atoms/songAtom";
+import {
+  isPlayingState,
+  currentTrackIdState,
+  playPosition,
+  playOffset,
+} from "../atoms/songAtom";
 import useSpotify from "../hooks/useSpotify";
 import Songs from "./Songs";
 import { shuffle } from "lodash";
@@ -26,6 +35,8 @@ function Center() {
   const [playlist, setPlaylist] = useRecoilState(playlistState);
   const [isPlaying, setIsPlaying] = useRecoilState(isPlayingState);
   const setCurrentTrackId = useSetRecoilState(currentTrackIdState);
+  const setPosition = useSetRecoilState(playPosition);
+  const setOffset = useSetRecoilState(playOffset);
   const spotifyApi = useSpotify();
 
   useEffect(() => {
@@ -43,19 +54,30 @@ function Center() {
   }, [spotifyApi, currentPlaylistId]);
 
   const handlePlayPause = () => {
-    if (isPlaying) {
-      spotifyApi.pause().then(setIsPlaying(false));
-    } else {
-      spotifyApi
-        .play({
-          context_uri: playlist.uri,
-          offset: {
-            position: 0,
-          },
-        })
-        .then(setCurrentTrackId(playlist.tracks.items[0].track.id));
-      setIsPlaying(true);
-    }
+    spotifyApi.getMyCurrentPlaybackState().then((data) => {
+      if (!data?.body) return;
+      if (isPlaying) {
+        spotifyApi.pause().then(() => {
+          setPosition(data.body.progress_ms);
+          setIsPlaying(false);
+        });
+      } else {
+        spotifyApi
+          .play({
+            context_uri: playlist.uri,
+            offset: {
+              position: 0,
+            },
+            position_ms: 0,
+          })
+          .then(() => {
+            setCurrentTrackId(playlist.tracks.items[0].track.id);
+            setPosition(0);
+            setOffset(0);
+            setIsPlaying(true);
+          });
+      }
+    });
   };
 
   return (
@@ -71,7 +93,7 @@ function Center() {
             alt="avatar"
           />
           <h2>{session?.user.name}</h2>
-          <ChevronDownIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faChevronDown} className="h-5 w-5" />
         </div>
       </header>
       <section
@@ -92,13 +114,15 @@ function Center() {
       <section>
         <div>
           {isPlaying ? (
-            <PauseIcon
-              className="button w-20 h-20 ml-10 text-green-600"
+            <FontAwesomeIcon
+              icon={faCirclePause}
+              className="button w-16 h-16 ml-10 text-green-600"
               onClick={handlePlayPause}
             />
           ) : (
-            <PlayIcon
-              className="button w-20 h-20 ml-10 text-green-600"
+            <FontAwesomeIcon
+              icon={faCirclePlay}
+              className="button w-16 h-16 ml-10 text-green-600"
               onClick={handlePlayPause}
             />
           )}

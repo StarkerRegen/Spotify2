@@ -1,14 +1,13 @@
 import { signOut, useSession } from "next-auth/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  HomeIcon,
-  LibraryIcon,
-  PlusCircleIcon,
-  SearchIcon,
-  HeartIcon,
-  RssIcon,
-  LogoutIcon,
-  VolumeUpIcon,
-} from "@heroicons/react/outline";
+  faHomeUser,
+  faHeart,
+  faRss,
+  faArrowRightFromBracket,
+  faMagnifyingGlass,
+  faLandmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import useSpotify from "../hooks/useSpotify";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -41,33 +40,29 @@ function Sidebar() {
           className="flex items-center space-x-2 hover:text-white"
           onClick={() => signOut()}
         >
-          <LogoutIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faArrowRightFromBracket} className="h-4 w-4" />
           <p>Log Out</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
-          <HomeIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faHomeUser} className="h-4 w-4" />
           <p>Home</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
-          <SearchIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4" />
           <p>Search</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
-          <LibraryIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faLandmark} className="h-4 w-4" />
           <p>Your Library</p>
         </button>
         <hr className="border-t-[0.1px] border-gray-900"></hr>
 
         <button className="flex items-center space-x-2 hover:text-white">
-          <PlusCircleIcon className="h-5 w-5" />
-          <p>Create Playlist</p>
-        </button>
-        <button className="flex items-center space-x-2 hover:text-white">
-          <HeartIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faHeart} className="h-4 w-4" />
           <p>Liked Songs</p>
         </button>
         <button className="flex items-center space-x-2 hover:text-white">
-          <RssIcon className="h-5 w-5" />
+          <FontAwesomeIcon icon={faRss} className="h-4 w-4" />
           <p>Your episodes</p>
         </button>
         <hr className="border-t-[0.1px] border-gray-900"></hr>
