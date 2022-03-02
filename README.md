@@ -1,6 +1,6 @@
 # About this
 
-Create a Next.js App with Tailwind CSS and depoly it on Vercel. You can use it to controll your PC/WEB Spotify APP. It can obtain the user's song list and local equipment, and realize the functions of playing, pause, progress control, song switching, volume setting and so on.
+Create a Next.js App with Tailwind CSS and depoly it on Vercel. You can use it to control your PC/WEB Spotify APP. It can obtain the user's song list and local equipment, and realize the functions of playing, pause, progress control, song switching, volume setting and so on.
 
 ## Prepares
 
