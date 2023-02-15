@@ -21,4 +21,6 @@ npm i recoil
 ## Online Demo
 
 🥳 🥳
-https://www.llsszzoho.online/
+http://spotify2-nine.vercel.app/
+
+P.S. If you don't have a Spotify account with Premium, the Spotify api won't work properly.
